@@ -19,10 +19,20 @@ const app = initializeApp(firebaseConfig);
 console.log(app);
 // document.getElementById("test").innerHTML = collection(db, "book");
 const db = getFirestore(app);
-const book = collection(db, "book");
-const docRef = doc(book);
-const docSnap = getDoc(docRef);
-console.log(docSnap);
+async function opendb(){
+
+  const docRef = doc(db, "tmp", "pics");
+  const docSnap = await getDoc(docRef);
+  const data = docSnap.data().pic;
+  console.log(data);
+  // console.log(data.length);
+  // for(let i =0 ; i<data.length ; i++ ){
+  //   console.log(data[i]);
+  // }
+  // return ;
+
+}
+window.opendb = opendb;
 
 
           
