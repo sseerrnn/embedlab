@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { collection, doc, getDoc } from "firebase/firestore"; 
-
+import { getStorage, ref } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyASCqxo8pwAMSjfeXriWtSWjaOgf_17sag",
@@ -25,14 +25,16 @@ async function opendb(){
   const docSnap = await getDoc(docRef);
   const data = docSnap.data().pic;
   console.log(data);
-  // console.log(data.length);
-  // for(let i =0 ; i<data.length ; i++ ){
-  //   console.log(data[i]);
-  // }
-  // return ;
+  
 
 }
 window.opendb = opendb;
+
+async function openpic(){
+
+  return;
+
+}
 
 
           
