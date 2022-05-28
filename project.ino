@@ -1,3 +1,4 @@
+#include <SoftwareSerial.h>
 #include <AuthClient.h>
 #include <debug.h>
 #include <MicroGear.h>
@@ -5,13 +6,20 @@
 #include <PubSubClient.h>
 #include <SHA1.h>
 
+const byte RX = D7;
+const byte TX = D8;
+SoftwareSerial mySerial (RX, TX);
+long lastUART = 0, lastDHT = 0;
+void Read_Uart();    // UART STM
+String stDist = "0000";
+int dist = 0;
 
+#include "DHT20.h" // Manage lib -> DHT20
 
+DHT20 DHT(&Wire);
 
-
-
-const char* ssid = "iPhone";
-const char* password = "Sernsea1";
+const char* ssid = "----";
+const char* password = "------";
 const char* mqtt_server = "broker.netpie.io";
 const int mqtt_port = 1883;
 const char* mqtt_Client = "bbcf287f-b6e1-442d-8323-1db628d39352";
@@ -38,8 +46,12 @@ void reconnect() {
   }
 }
 
-void setup() {
-  Serial.begin(115200);
+
+void setup()
+{
+  Serial.begin(9600);
+  mySerial.begin(115200);
+  
   Serial.println("Starting...");
   if (WiFi.begin(ssid, password)) {
     while (WiFi.status() != WL_CONNECTED) {
@@ -51,22 +63,86 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
   client.setServer(mqtt_server, mqtt_port);
+
+  Serial.println("UART Start");
+
+  lastUART = millis();
+  lastDHT = millis();
+
+  DHT.begin(D5, D6); // SDA, SCK
+  delay(2000);
+
+  Serial.println("Type,\tStatus,\tHumidity (%),\tTemperature (C)");
   
 }
-
-void loop() {
-  if (!client.connected()) {
-    reconnect();
+void loop()
+{
+//   READ DATA
+  if (millis()-lastDHT > 1000){
+    Serial.print("DHT20, \t");
+    int status = DHT.read();
+    switch (status)
+    {
+    case DHT20_OK:
+      Serial.print("OK,\t");
+      break;
+    case DHT20_ERROR_CHECKSUM:
+      Serial.print("Checksum error,\t");
+      break;
+    case DHT20_ERROR_CONNECT:
+      Serial.print("Connect error,\t");
+      break;
+    case DHT20_MISSING_BYTES:
+      Serial.print("Missing bytes,\t");
+      break;
+    default:
+      Serial.print("Unknown error,\t");
+      break;
+    }
+    Serial.println();
+    // DISPLAY DATA, sensor has only one decimal.
+//    Serial.print(DHT.getHumidity(), 1); // Get humidity
+//    Serial.print(",\t");
+//    Serial.println(DHT.getTemperature(), 1); // Get temperature
+    lastDHT = millis();
   }
-  client.loop();
-  
+  Read_Uart();
+  if (millis() - lastUART > 1000)
+  {
+    mySerial.print("1ON2ON3OFF4");
+    Serial.println("Sent");
+    lastUART = millis();
+  }
+}
+void Read_Uart()
+{
+  String st = "";
+  while (mySerial.available())
+  {
+    char inChar = (char)mySerial.read();
+    st +=  inChar;
+    if (inChar == 'C')
+    {
+      Serial.println("Received : " + st);
+      int A = st.indexOf("A");
+      int B = st.indexOf("B");
+      int C = st.indexOf("C");
 
-  String data = "{ \"data\" : { \"humidity\" : \"10\"}}";
-    
-  Serial.println(data);
-  data.toCharArray(msg, (data.length() + 1));
-  client.publish("@msg/data", msg);
-  client.publish("@shadow/data/update", msg);
-  Serial.println("Hello NETPIE2020");
-  delay(2000);
+      stDist = st.substring(A + 1, B);
+      dist = stDist.toInt();  // Get distance
+      
+      Serial.println(dist);
+      if (!client.connected()) {
+        reconnect();
+      }
+      client.loop();
+      String data = "{ \"data\" : { \"Distance\" : "+String(dist)+", \"Humidity\" : "+String(DHT.getHumidity())+", \"Temperature\" : "+String(DHT.getTemperature())+"}}";
+      Serial.println(data);
+      data.toCharArray(msg, (data.length() + 1));
+      client.publish("@msg/data", msg);
+      client.publish("@shadow/data/update", msg);
+      Serial.println("DATA SENT");
+      break;
+    }
+  }
 }
