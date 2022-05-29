@@ -1,4 +1,6 @@
-#include <SoftwareSerial.h>
+// setHasItem and setHasWarning need 10 consecutive seconds to toggle theirs flag
+// need to download DHT20 library from library manager
+#include <SoftwareSerial.h> 
 #include <AuthClient.h>
 #include <debug.h>
 #include <MicroGear.h>
@@ -10,6 +12,9 @@ const byte RX = D7;
 const byte TX = D8;
 SoftwareSerial mySerial (RX, TX);
 long lastUART = 0, lastDHT = 0;
+int hasItem = 0, hasWarning = 0;
+long itemMillis = 0, warningMillis = 0;
+int itemState = 0, warningState = 0; // 0 = empty state , 1 = begin counting  
 void Read_Uart();    // UART STM
 String stDist = "0000";
 int dist = 0;
@@ -18,8 +23,8 @@ int dist = 0;
 
 DHT20 DHT(&Wire);
 
-const char* ssid = "----";
-const char* password = "------";
+const char* ssid = "........";
+const char* password = ".......";
 const char* mqtt_server = "broker.netpie.io";
 const int mqtt_port = 1883;
 const char* mqtt_Client = "bbcf287f-b6e1-442d-8323-1db628d39352";
@@ -114,6 +119,66 @@ void loop()
     lastUART = millis();
   }
 }
+
+void setItemState(){
+   if(hasItem == 0){
+     if(dist < 100 && itemState == 0){
+        itemState = 1;
+        itemMillis = millis()+10000;
+      }
+      else if(dist >= 100 && itemState == 1){
+        itemState = 0;
+      }
+      else if(millis() >= itemMillis && itemState == 1){
+        hasItem = !hasItem;
+        itemState = 0;
+      } 
+   }
+   else{
+      if(dist > 100 && itemState == 0){
+        itemState = 1;
+        itemMillis = millis()+10000;
+      }
+      else if(dist <= 100 && itemState == 1){
+        itemState = 0;
+      }
+      else if(millis() >= itemMillis && itemState == 1){
+        hasItem = !hasItem;
+        itemState = 0;
+      }
+   }
+}
+
+void setWarningState(){
+  
+  if(hasItem == 0) return ;
+  if(warningState == 0){
+      if((DHT.getHumidity() >= 75 || DHT.getTemperature() >= 40) && warningState == 0){
+        warningState = 1;
+        warningMillis = millis()+10000;
+      }
+      else if(!(DHT.getHumidity() >= 75 || DHT.getTemperature() >= 40) && warningState == 1){
+        warningState = 0;
+      }
+      else if(millis() >= warningMillis && warningState == 1){
+        hasWarning = !hasWarning;
+        warningState = 0;
+      }
+  }else {
+      if(!(DHT.getHumidity() >= 75 || DHT.getTemperature() >= 40) && warningState == 0){
+        warningState = 1;
+        warningMillis = millis()+10000;
+      }
+      else if((DHT.getHumidity() >= 75 || DHT.getTemperature() >= 40) && warningState == 1){
+        warningState = 0;
+      }
+      else if(millis() >= warningMillis && warningState == 1){
+        hasWarning = !hasWarning;
+        warningState = 0;
+      }
+  }
+}
+
 void Read_Uart()
 {
   String st = "";
@@ -130,13 +195,17 @@ void Read_Uart()
 
       stDist = st.substring(A + 1, B);
       dist = stDist.toInt();  // Get distance
+
+      setItemState();
+      setWarningState();
       
       Serial.println(dist);
       if (!client.connected()) {
         reconnect();
       }
       client.loop();
-      String data = "{ \"data\" : { \"Distance\" : "+String(dist)+", \"Humidity\" : "+String(DHT.getHumidity())+", \"Temperature\" : "+String(DHT.getTemperature())+"}}";
+      String data = "{ \"data\" : { \"Distance\" : "+String(dist)+", \"Humidity\" : "+String(DHT.getHumidity())+", \"Temperature\" : "+String(DHT.getTemperature())+
+                    ", \"hasItem\" : "+String(hasItem)+", \"hasWarn\" : "+String(hasWarning)+"}}";
       Serial.println(data);
       data.toCharArray(msg, (data.length() + 1));
       client.publish("@msg/data", msg);
