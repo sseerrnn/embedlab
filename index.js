@@ -30,12 +30,14 @@ async function opendb(){
 }
 window.opendb = opendb;
 
-async function openpic(){
-
-  return;
-
+function openpic(){
+  document.getElementById('status').src = "pic/cloudy.jpg";
 }
+window.openpic = openpic;
 
+function check(){
+  
+}
 
           
 
