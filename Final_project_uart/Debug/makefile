@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
+# Toolchain: GNU Tools for STM32 (10.3-2021.10)
 ################################################################################
 
 -include ../makefile.init
@@ -47,14 +47,14 @@ BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ART
 EXECUTABLES += \
 Final_project_uart.elf \
 
+MAP_FILES += \
+Final_project_uart.map \
+
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
 Final_project_uart.list \
-
-OBJCOPY_BIN += \
-Final_project_uart.bin \
 
 
 # All Target
@@ -64,8 +64,8 @@ all: main-build
 main-build: Final_project_uart.elf secondary-outputs
 
 # Tool invocations
-Final_project_uart.elf: $(OBJS) $(USER_OBJS) C:\Users\User\Desktop\Workspace\Embeded_Lab\Final_project_uart\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Final_project_uart.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\User\Desktop\Workspace\Embeded_Lab\Final_project_uart\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Final_project_uart.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Final_project_uart.elf Final_project_uart.map: $(OBJS) $(USER_OBJS) D:\Program\ Files\ (x86)\CHULA\Y2TERM2\EMBEDDED\ LAB\pj\embedlab\Final_project_uart\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Final_project_uart.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Program Files (x86)\CHULA\Y2TERM2\EMBEDDED LAB\pj\embedlab\Final_project_uart\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Final_project_uart.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -79,17 +79,12 @@ Final_project_uart.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DE
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Final_project_uart.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "Final_project_uart.bin"
-	@echo 'Finished building: $@'
-	@echo ' '
-
 # Other Targets
 clean:
-	-$(RM) Final_project_uart.bin Final_project_uart.elf Final_project_uart.list default.size.stdout
+	-$(RM) Final_project_uart.elf Final_project_uart.list Final_project_uart.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

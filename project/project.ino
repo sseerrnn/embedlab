@@ -7,7 +7,7 @@
 #include <MQTTClient.h>
 #include <PubSubClient.h>
 #include <SHA1.h>
-
+const int limit_humid = 30;
 const byte RX = D7;
 const byte TX = D8;
 SoftwareSerial mySerial (RX, TX);
@@ -23,8 +23,8 @@ int dist = 0;
 
 DHT20 DHT(&Wire);
 
-const char* ssid = "........";
-const char* password = ".......";
+const char* ssid = "Sern";
+const char* password = "Sernsea1";
 const char* mqtt_server = "broker.netpie.io";
 const int mqtt_port = 1883;
 const char* mqtt_Client = "bbcf287f-b6e1-442d-8323-1db628d39352";
@@ -151,13 +151,16 @@ void setItemState(){
 
 void setWarningState(){
   
-  if(hasItem == 0) return ;
-  if(warningState == 0){
-      if((DHT.getHumidity() >= 75 || DHT.getTemperature() >= 40) && warningState == 0){
+  if(hasItem == 0){
+    hasWarning =0;
+    return ;
+  }
+  if(hasWarning == 0){
+      if((DHT.getHumidity() >= limit_humid || DHT.getTemperature() >= 40) && warningState == 0){
         warningState = 1;
         warningMillis = millis()+10000;
       }
-      else if(!(DHT.getHumidity() >= 75 || DHT.getTemperature() >= 40) && warningState == 1){
+      else if(!(DHT.getHumidity() >= limit_humid || DHT.getTemperature() >= 40) && warningState == 1){
         warningState = 0;
       }
       else if(millis() >= warningMillis && warningState == 1){
@@ -165,11 +168,11 @@ void setWarningState(){
         warningState = 0;
       }
   }else {
-      if(!(DHT.getHumidity() >= 75 || DHT.getTemperature() >= 40) && warningState == 0){
+      if(!(DHT.getHumidity() >= limit_humid || DHT.getTemperature() >= 40) && warningState == 0){
         warningState = 1;
         warningMillis = millis()+10000;
       }
-      else if((DHT.getHumidity() >= 75 || DHT.getTemperature() >= 40) && warningState == 1){
+      else if((DHT.getHumidity() >= limit_humid || DHT.getTemperature() >= 40) && warningState == 1){
         warningState = 0;
       }
       else if(millis() >= warningMillis && warningState == 1){
