@@ -1,5 +1,19 @@
-// const { get } = require("http");
 const https = require("https");
+
+function pictureset(data){
+  if(data["hasItem"]==1){
+    // humidity.innerHTML = JSON.stringify(data["Humidity"]);
+    //   distance.innerHTML = JSON.stringify(data["Distance"]);
+    //   temperature.innerHTML = JSON.stringify(data["Temperature"]);
+    //   hasitem.innerHTML = JSON.stringify(data["hasItem"]);
+    //   haswarn.innerHTML = JSON.stringify(data["hasWarn"]);
+    document.getElementById('status').src = "pic/cloudy.jpg";
+  }
+  else if(data["hasItem"]==0){
+    document.getElementById('status').src = "pic/cloudy.jpg";
+
+  }
+}
 
 window.get = function() {
     const options = {
@@ -23,11 +37,7 @@ window.get = function() {
         
       data = JSON.parse(buffer).data;
       console.log(data);
-      humidity.innerHTML = JSON.stringify(data["Humidity"]);
-      distance.innerHTML = JSON.stringify(data["Distance"]);
-      temperature.innerHTML = JSON.stringify(data["Temperature"]);
-      hasitem.innerHTML = JSON.stringify(data["hasItem"]);
-      haswarn.innerHTML = JSON.stringify(data["hasWarn"]);
+      pictureset(data);
       
       
       
