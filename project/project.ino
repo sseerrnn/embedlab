@@ -7,7 +7,7 @@
 #include <MQTTClient.h>
 #include <PubSubClient.h>
 #include <SHA1.h>
-const int limit_humid = 30;
+const int limit_humid = 80;
 const byte RX = D7;
 const byte TX = D8;
 SoftwareSerial mySerial (RX, TX);
