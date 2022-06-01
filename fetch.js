@@ -1,20 +1,22 @@
 const https = require("https");
-
+var now=0;
+var end=0;
 function pictureset(data){
   
-    if(data["Humidity"]>80){
-      document.getElementById('status').src = "pic/raining.jpg";
-      document.getElementById('status_comment').innerHTML = "rainy";
-    }else if(data["Temperature"]>40){
-      document.getElementById('status').src = "pic/hot.jpg";
-      document.getElementById('status_comment').innerHTML = "hot";
-    }else if(data["Temperature"]>35){
-      document.getElementById('status').src = "pic/sunny.jpg";
-      document.getElementById('status_comment').innerHTML = "sunny";
+  if(data["Humidity"]>80){
+    document.getElementById('status').src = "pic/raining.jpg";
+    document.getElementById('status_comment').innerHTML = "rainy";
+  }else if(data["Temperature"]>40){
+    document.getElementById('status').src = "pic/hot.jpg";
+    document.getElementById('status_comment').innerHTML = "hot";
+  }else if(data["Temperature"]>35){
+    document.getElementById('status').src = "pic/sunny.jpg";
+    document.getElementById('status_comment').innerHTML = "sunny";
     }else{
       document.getElementById('status').src = "pic/cloudy.jpg";
       document.getElementById('status_comment').innerHTML = "cloudy";
     }
+    if(now>=end){
     if(data["hasItem"]==1){
       if(data["hasWarn"]==0){
         document.getElementById('alert').src = "pic/alert_off.jpg";
@@ -25,14 +27,15 @@ function pictureset(data){
       }
     }
     
-  
+    
     else if(data["hasItem"]==0){
       // document.getElementById('status').src = "pic/mystery.jpg";
       // document.getElementById('status_comment').innerHTML = "no package found";
       document.getElementById('alert').src = "pic/mystery.jpg";
       document.getElementById('alert_comment').innerHTML = "no package found";
     }
-
+  }
+    
 
 }
 
@@ -72,6 +75,7 @@ window.get = function() {
 }
 async function startPolling () {
   await get();// รอให้ดึงข้อมูลเสร็จก่อน ค่อยรออีก 3 วินาที
+  now+=1;
   setTimeout(startPolling, 1000);
 } 
 window.setzero = function() {
@@ -110,7 +114,12 @@ window.setzero = function() {
 });
   req.write(data);
  req.end();
+
+ end = now+10;
  
+
+ document.getElementById('alert').src = "pic/mystery.jpg";
+      document.getElementById('alert_comment').innerHTML = "no package found";
 }
    
    
