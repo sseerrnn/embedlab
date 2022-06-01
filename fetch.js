@@ -54,7 +54,44 @@ async function startPolling () {
   await get();// รอให้ดึงข้อมูลเสร็จก่อน ค่อยรออีก 3 วินาที
   setTimeout(startPolling, 3000);
 } 
+window.setzero = function() {
+  const options = {
+      hostname: 'api.netpie.io',
+      path: '/v2/device/shadow/data?alias=device3',
+      method: 'POST',
+      headers: {'Authorization': 'Device bbcf287f-b6e1-442d-8323-1db628d39352:NYMcSAwMK3XWPYT7T6FTNFsv3XBBXwnr'},
+    };
   
+    const data = JSON.stringify({
+      "data": {
+         "Distance": 0,
+         "Humidity": 0,
+         "Temperature": 0,
+         "hasItem": 0,
+         "hasWarn": 0
+       }
+     });
+    const req = https.request(options, res => {
+      console.log(`statusCode: ${res.statusCode}`);
+      var data = '';
+      res.on('data', d => {
+        data += d;
+    });
+    
+      res.on('end', (err) => {
+      // console.log(buffer);
+      // console.log('\n');
+      
+        console.log('Body: ', JSON.parse(data));
+  });
+  
+}).on('error', error => {
+  console.error(error);
+});
+  req.write(data);
+ req.end();
+ 
+}
    
    
    
